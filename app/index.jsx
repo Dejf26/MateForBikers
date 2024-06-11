@@ -1,13 +1,32 @@
-import { StatusBar } from 'expo-status-bar';
-import { Text, View } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, Image } from 'react-native'
+import React, { useEffect } from 'react'
+import { Link, useNavigation } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { StatusBar } from 'expo-status-bar'
 
-export default function App() {
+const Index = () => {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const redirectTimer = setTimeout(() => {
+      navigation.navigate('(drawer)'); 
+    }, 2500); 
+
+    return () => clearTimeout(redirectTimer);
+  }, []);
+
   return (
-    <View className="flex-1 items-center justify-center bg-white">
-    <Text className="text-3xl">MFB!</Text>
-      <StatusBar style="auto" />
-    <Link href="/vehicles" style={{color: 'blue'}}>Go to vehicles</Link>
-    </View>
+    <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#121212' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center'}}>
+        <Image
+          source={require('../assets/images/mfb.png')}
+          style={{ width: 90, height: 90,   }}
+        />
+        <Text style={{ fontSize: 40, color: 'white', marginRight:10 }}>Mate for Bikers</Text>
+      </View>
+      <StatusBar style='light'/>
+    </SafeAreaView>
   );
 }
+
+export default Index;
