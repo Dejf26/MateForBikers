@@ -4,8 +4,8 @@ import React from 'react'
 
 const Vehicles = () => {
   return (
-    <View>
-      <Text>Vehicles</Text>
+    <View className="flex-1 items-center justify-center bg-[#121212]">
+    <Text className="text-3xl text-white">Vehicles</Text>
     </View>
   )
 }
