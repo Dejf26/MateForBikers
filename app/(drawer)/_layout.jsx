@@ -47,7 +47,7 @@ const Layout = () => {
     title:(<View style={{flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
                 <Image
                   source={require('../../assets/images/mfb.png')}
-                  style={{ width: 43, height: 43, marginLeft:-13}} // Dostosuj szerokość i wysokość do swojego logo
+                  style={{ width: 43, height: 43, marginLeft:-13}}
                 />
                 <Text style={{ color: 'white',fontSize: 24 }}>Mate for Bikers</Text>
               </View>),
@@ -68,7 +68,7 @@ const Layout = () => {
     title:(<View style={{flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
                 <Image
                   source={require('../../assets/images/mfb.png')}
-                  style={{ width: 43, height: 43, marginLeft:-13}} // Dostosuj szerokość i wysokość do swojego logo
+                  style={{ width: 43, height: 43, marginLeft:-13}}
                 />
                 <Text style={{ color: 'white',fontSize: 24 }}>Mate for Bikers</Text>
               </View>),
@@ -81,7 +81,7 @@ const Layout = () => {
     title:(<View style={{flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
                 <Image
                   source={require('../../assets/images/mfb.png')}
-                  style={{ width: 43, height: 43, marginLeft:-13}} // Dostosuj szerokość i wysokość do swojego logo
+                  style={{ width: 43, height: 43, marginLeft:-13}}
                 />
                 <Text style={{ color: 'white',fontSize: 24 }}>Mate for Bikers</Text>
               </View>),
@@ -94,7 +94,7 @@ const Layout = () => {
     title:(<View style={{flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
                 <Image
                   source={require('../../assets/images/mfb.png')}
-                  style={{ width: 43, height: 43, marginLeft:-13}} // Dostosuj szerokość i wysokość do swojego logo
+                  style={{ width: 43, height: 43, marginLeft:-13}}
                 />
                 <Text style={{ color: 'white',fontSize: 24 }}>Mate for Bikers</Text>
               </View>),
@@ -107,7 +107,7 @@ const Layout = () => {
     title:(<View style={{flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
                 <Image
                   source={require('../../assets/images/mfb.png')}
-                  style={{ width: 43, height: 43, marginLeft:-13}} // Dostosuj szerokość i wysokość do swojego logo
+                  style={{ width: 43, height: 43, marginLeft:-13}}
                 />
                 <Text style={{ color: 'white',fontSize: 24 }}>Mate for Bikers</Text>
               </View>),
