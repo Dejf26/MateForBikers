@@ -1,9 +1,33 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    if (email && password) {
+      const users = await AsyncStorage.getItem('users');
+      const parsedUsers = users ? JSON.parse(users) : [];
+
+      const user = parsedUsers.find((u) => u.email === email && u.password === password);
+
+      if (user) {
+        await AsyncStorage.setItem('user', JSON.stringify({ email: user.email }));
+
+        Alert.alert('Zalogowano pomyślnie');
+        router.push('/(drawer)/(tabs)/start');
+      } else {
+        Alert.alert('Niepoprawny email lub hasło');
+      }
+    } else {
+      Alert.alert('Wprowadź email i hasło');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Logowanie</Text>
@@ -14,6 +38,8 @@ const Login = () => {
             placeholder="Adres email"
             placeholderTextColor="#6e6e6e"
             style={styles.input}
+            onChangeText={setEmail}
+            value={email}
           />
         </View>
         <View style={styles.inputWrapper}>
@@ -23,10 +49,12 @@ const Login = () => {
             placeholderTextColor="#6e6e6e"
             secureTextEntry
             style={styles.input}
+            onChangeText={setPassword}
+            value={password}
           />
         </View>
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Zaloguj się</Text>
       </TouchableOpacity>
       <Text style={styles.footerText}>
@@ -34,7 +62,9 @@ const Login = () => {
       </Text>
     </View>
   );
-}
+};
+
+export default Login;
 
 const styles = StyleSheet.create({
   container: {
@@ -91,4 +121,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;

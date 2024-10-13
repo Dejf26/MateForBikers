@@ -1,9 +1,41 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import { Link } from 'expo-router';
+import { router, Link } from 'expo-router';
 
 const Register = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleRegister = async () => {
+    if (email && password && confirmPassword) {
+      if (password !== confirmPassword) {
+        Alert.alert('Hasła nie pasują do siebie');
+        return;
+      }
+
+      const existingUsers = await AsyncStorage.getItem('users');
+      const users = existingUsers ? JSON.parse(existingUsers) : [];
+
+      const userExists = users.find((user) => user.email === email);
+      if (userExists) {
+        Alert.alert('Użytkownik już istnieje');
+        return;
+      }
+
+      const newUser = { email, password };
+      users.push(newUser);
+      await AsyncStorage.setItem('users', JSON.stringify(users));
+
+      Alert.alert('Rejestracja zakończona sukcesem');
+      router.push('/login');
+    } else {
+      Alert.alert('Wprowadź email oraz hasła');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Rejestracja</Text>
@@ -14,6 +46,8 @@ const Register = () => {
             placeholder="Adres email"
             placeholderTextColor="#6e6e6e"
             style={styles.input}
+            onChangeText={setEmail}
+            value={email}
           />
         </View>
         <View style={styles.inputWrapper}>
@@ -23,6 +57,8 @@ const Register = () => {
             placeholderTextColor="#6e6e6e"
             secureTextEntry
             style={styles.input}
+            onChangeText={setPassword}
+            value={password}
           />
         </View>
         <View style={styles.inputWrapper}>
@@ -32,10 +68,12 @@ const Register = () => {
             placeholderTextColor="#6e6e6e"
             secureTextEntry
             style={styles.input}
+            onChangeText={setConfirmPassword}
+            value={confirmPassword}
           />
         </View>
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Zarejestruj się</Text>
       </TouchableOpacity>
       <Text style={styles.footerText}>
@@ -43,7 +81,9 @@ const Register = () => {
       </Text>
     </View>
   );
-}
+};
+
+export default Register;
 
 const styles = StyleSheet.create({
   container: {
@@ -99,5 +139,3 @@ const styles = StyleSheet.create({
     color: '#007bff',
   },
 });
-
-export default Register;
