@@ -36,7 +36,7 @@ const Start = () => {
         subtitle3="Rok produkcji" 
         description3="Rok produkcji" 
         color="#2D2F33" 
-        image={require('../../../assets/images/route.jpg')} 
+        image={require('../../../assets/images/bike.jpg')} 
       />
       <Tile 
         title="Prognoza pogody" 
@@ -81,12 +81,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   image: {
-    width: '100%',
-    justifyContent: 'flex-end',
-    marginLeft: 60
+   width: '100%',
+  justifyContent:'flex-end',
+  marginLeft: 60
   },
   skewedTextContainer: {
-    width: '125%',
+    width: '115%',
     height: '150%',
     padding: 10,
     marginLeft: -180,

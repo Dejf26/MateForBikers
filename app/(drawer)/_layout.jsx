@@ -91,6 +91,8 @@ const ToggleDrawer = () => {
 }
 
 const Layout = () => {
+  const navigation = useNavigation();
+
   return (
     <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name='(tabs)' options={{
@@ -110,7 +112,7 @@ const Layout = () => {
         headerRight: () => (
           <Icon
             name="plus"
-            onPress={() => alert('Tutaj będzie przekierowanie!')}
+            onPress={() => navigation.navigate('addVehicle')} // Zaktualizuj tę linię do przekierowania
             color="#fff"
             size={25}
             style={{ marginRight: 15 }}
@@ -163,6 +165,36 @@ const Layout = () => {
         headerLeft: () => (<ToggleDrawer />),
       }} />
       <Drawer.Screen name='about' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+          <Drawer.Screen name='addVehicle' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+       <Drawer.Screen name='editVehicle' options={{
         headerShown: true,
         headerTintColor: "white",
         title: (
