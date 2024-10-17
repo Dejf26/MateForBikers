@@ -5,7 +5,7 @@ import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { router, usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const CustomDrawerContent = (props) => {
   const pathname = usePathname();
@@ -92,6 +92,36 @@ const ToggleDrawer = () => {
 
 const Layout = () => {
   const navigation = useNavigation();
+  const route = useRoute(); 
+
+  const handlePlusPress = () => {
+    const getActiveRouteName = (state) => {
+      if (!state || !state.routes || state.routes.length === 0) return null;
+      
+      const route = state.routes[state.index];  
+  
+      
+      if (route.state) {
+        
+        return getActiveRouteName(route.state);
+      }
+  
+      return route.name;  
+    };
+  
+    const state = navigation.getState();
+    const activeRoute = getActiveRouteName(state);
+  
+    console.log('Current Active Route:', activeRoute);
+  
+    if (activeRoute === 'costs') {
+      navigation.navigate('addCost');
+    } else if (activeRoute === 'vehicles') {
+      navigation.navigate('addVehicle');
+    } else {
+      Alert.alert('Brak przekierowania');
+    }
+  };
 
   return (
     <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />}>
@@ -112,7 +142,7 @@ const Layout = () => {
         headerRight: () => (
           <Icon
             name="plus"
-            onPress={() => navigation.navigate('addVehicle')} // Zaktualizuj tę linię do przekierowania
+            onPress={handlePlusPress} 
             color="#fff"
             size={25}
             style={{ marginRight: 15 }}
@@ -195,6 +225,36 @@ const Layout = () => {
         headerLeft: () => (<ToggleDrawer />),
       }} />
        <Drawer.Screen name='editVehicle' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+       <Drawer.Screen name='addCost' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+             <Drawer.Screen name='editCost' options={{
         headerShown: true,
         headerTintColor: "white",
         title: (
