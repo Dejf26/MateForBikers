@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, ImageBackground, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ImageBackground, TouchableOpacity, FlatList, Modal } from 'react-native';
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { MaterialIcons } from '@expo/vector-icons'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,13 +20,10 @@ const VehicleTile = ({ vehicle, isChecked, onSelect, onOptions, onEdit, onDelete
       <View style={styles.textContainer}>
         <Text style={styles.subtitleText}>Marka:</Text>
         <Text style={styles.descriptionText}>{vehicle.brand}</Text>
-       
         <Text style={styles.subtitleText}>Model:</Text>
         <Text style={styles.descriptionText}>{vehicle.model}</Text>
-        
         <Text style={styles.subtitleText}>Rok produkcji:</Text>
         <Text style={styles.descriptionText}>{vehicle.year}</Text>
-
         <Text style={styles.subtitleText}>VIN:</Text>
         <Text style={styles.descriptionText}>{vehicle.vin}</Text>
       </View>
@@ -59,11 +56,11 @@ const VehicleTile = ({ vehicle, isChecked, onSelect, onOptions, onEdit, onDelete
 
 const VehiclesList = () => {
   const navigation = useNavigation();
-
   const [vehicles, setVehicles] = useState([]);
   const [vehicleToEditOrDelete, setVehicleToEditOrDelete] = useState(null);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [optionsVisible, setOptionsVisible] = useState(null); 
+  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchVehicles = async () => {
     try {
@@ -75,17 +72,45 @@ const VehiclesList = () => {
     }
   };
 
+  const loadSelectedVehicle = async () => {
+    try {
+      const storedVin = await AsyncStorage.getItem('selectedVehicle');
+      if (storedVin) {
+        const foundVehicle = vehicles.find(vehicle => vehicle.vin === storedVin);
+        if (foundVehicle) {
+          setSelectedVehicle(foundVehicle);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading selected vehicle:", error);
+    }
+  };
+
   useFocusEffect(
     React.useCallback(() => {
       fetchVehicles(); 
     }, [])
   );
 
-  const handleSelectVehicle = (vehicle) => {
-    if (selectedVehicle && selectedVehicle.vin === vehicle.vin) {
-      setSelectedVehicle(null);
-    } else {
-      setSelectedVehicle(vehicle);
+  useEffect(() => {
+    if (vehicles.length > 0) {
+      loadSelectedVehicle();
+    }
+  }, [vehicles]);
+
+  const handleSelectVehicle = async (vehicle) => {
+    try {
+      if (selectedVehicle && selectedVehicle.vin === vehicle.vin) {
+        setSelectedVehicle(null);
+        await AsyncStorage.removeItem('selectedVehicle');
+        console.log('Pojazd odznaczony, VIN usunięty z AsyncStorage');
+      } else {
+        setSelectedVehicle(vehicle);
+        await AsyncStorage.setItem('selectedVehicle', vehicle.vin);
+        console.log('Pojazd zaznaczony, VIN zapisany:', vehicle.vin);
+      }
+    } catch (error) {
+      console.error('Błąd podczas zapisywania VIN w AsyncStorage:', error);
     }
   };
 
@@ -99,15 +124,10 @@ const VehiclesList = () => {
   };
 
   const handleDeleteVehicle = async () => {
-    try {
-      const updatedVehicles = vehicles.filter(vehicle => vehicle.vin !== vehicleToEditOrDelete.vin);
-      await AsyncStorage.setItem('vehicles', JSON.stringify(updatedVehicles));
-      setVehicles(updatedVehicles);
-      alert('Pojazd usunięty!');
-      setOptionsVisible(null);
-    } catch (error) {
-      console.error("Error deleting vehicle:", error);
-    }
+    const updatedVehicles = vehicles.filter(vehicle => vehicle.vin !== vehicleToEditOrDelete.vin);
+    setVehicles(updatedVehicles);
+    await AsyncStorage.setItem('vehicles', JSON.stringify(updatedVehicles));
+    setModalVisible(false);
   };
 
   const handleEditVehicle = () => {
@@ -117,6 +137,14 @@ const VehiclesList = () => {
     } else {
       alert('Błąd: Nie wybrano pojazdu');
     }
+  };
+
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
   };
 
   return (
@@ -131,7 +159,7 @@ const VehiclesList = () => {
               onSelect={() => handleSelectVehicle(item)}
               onOptions={() => handleOptions(item)}
               onEdit={handleEditVehicle}
-              onDelete={handleDeleteVehicle}
+              onDelete={handleOpenModal}
               showOptions={optionsVisible === item.vin}
             />
           )}
@@ -141,6 +169,20 @@ const VehiclesList = () => {
       ) : (
         <Text style={styles.noVehiclesText}>Brak pojazdów do wyświetlenia</Text>
       )}
+   
+      <Modal transparent={true} visible={modalVisible} animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Czy na pewno chcesz usunąć ten pojazd?</Text>
+            <TouchableOpacity onPress={handleDeleteVehicle}>
+              <Text style={[styles.modalButton, { backgroundColor: '#d9534f' }]}>Usuń</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleCloseModal}>
+              <Text style={[styles.modalButton, { backgroundColor: '#007bff' }]}>Anuluj</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -204,12 +246,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 10,
     right: 10,
-    color: '#007bff'
-  },
-  noVehiclesText: {
-    color: 'white',
-    textAlign: 'center',
-    marginTop: 20,
+    color: '#007bff',
   },
   optionsContainer: {
     position: 'absolute',
@@ -227,6 +264,38 @@ const styles = StyleSheet.create({
   },
   optionText: {
     color: 'white',
+  },
+  noVehiclesText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#2D2F33',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalText: {
+    color: 'white',
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  modalButton: {
+    color: 'white',
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    textAlign: 'center',
+    marginVertical: 5,
   },
 });
 
