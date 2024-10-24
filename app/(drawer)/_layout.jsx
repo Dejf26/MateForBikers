@@ -112,12 +112,13 @@ const Layout = () => {
     const state = navigation.getState();
     const activeRoute = getActiveRouteName(state);
   
-    console.log('Current Active Route:', activeRoute);
   
     if (activeRoute === 'costs') {
       navigation.navigate('addCost');
     } else if (activeRoute === 'vehicles') {
       navigation.navigate('addVehicle');
+    } else if (activeRoute === 'routesm') {
+      navigation.navigate('addRoute');
     } else {
       Alert.alert('Brak przekierowania');
     }
@@ -255,6 +256,36 @@ const Layout = () => {
         headerLeft: () => (<ToggleDrawer />),
       }} />
              <Drawer.Screen name='editCost' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+        <Drawer.Screen name='addRoute' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+       <Drawer.Screen name='routeDetails' options={{
         headerShown: true,
         headerTintColor: "white",
         title: (
