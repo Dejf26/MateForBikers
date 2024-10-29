@@ -15,6 +15,7 @@ const NewRouteScreen = () => {
   const navigation = useNavigation();
   const [isRecording, setIsRecording] = useState(false);
   const [speed, setSpeed] = useState(0);
+  const [maxSpeed, setMaxSpeed] = useState(0); 
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState(0);
   const [leanAngle, setLeanAngle] = useState(0);
@@ -57,27 +58,27 @@ const NewRouteScreen = () => {
     return () => clearInterval(interval);
   }, [isRecording]);
 
+
   const handleStartStop = async () => {
     if (isRecording) {
       const startLocationName = await getCityFromLocation(currentLocation);
       const newRoute = {
         id: Date.now(),
-        startDate: new Date().toLocaleString(),  
-        startLocation: startLocationName,       
+        startDate: new Date().toLocaleString(),
+        startLocation: startLocationName,
         distance,
         duration,
         avgSpeed: (distance / (duration / 3600)).toFixed(1),
-        maxSpeed: (speed).toFixed(1),
+        maxSpeed: maxSpeed.toFixed(1),
         maxLeanLeft,
         maxLeanRight,
-        coordinates: routeCoordinates,  
-
+        coordinates: routeCoordinates,
       };
       await saveRouteToStorage(newRoute);
       resetRouteData();
       navigation.navigate('routesm');
     } else {
-    
+      // setMaxSpeed(0);
     }
     setIsRecording(!isRecording);
   };
@@ -86,6 +87,7 @@ const NewRouteScreen = () => {
     setDistance(0);
     setDuration(0);
     setSpeed(0);
+    setMaxSpeed(0);
     setLeanAngle(0);
     setMaxLeanLeft(0);
     setMaxLeanRight(0);
@@ -167,10 +169,14 @@ const NewRouteScreen = () => {
         distanceInterval: 1,
       },
       (location) => {
-        const { latitude, longitude } = location.coords;
+        const { latitude, longitude, speed: currentSpeed } = location.coords;
         setCurrentLocation({ latitude, longitude });
         setRouteCoordinates((prevCoords) => [...prevCoords, { latitude, longitude }]);
-        setSpeed(location.coords.speed || 0);
+        const speedInKmH = currentSpeed !== null && currentSpeed !== undefined ? (currentSpeed * 3.6).toFixed(1) : '0.0';
+        setSpeed(parseFloat(speedInKmH));
+    
+        setMaxSpeed((prevMaxSpeed) => Math.max(prevMaxSpeed, parseFloat(speedInKmH)));
+    
         setGpsSignalStrength(location.coords.accuracy <= 5 ? 'Mocny' : 'Słaby');
       }
     );
@@ -220,6 +226,39 @@ const NewRouteScreen = () => {
     }
   };
 
+  const getNeedleRotation = (currentSpeed) => {
+    const maxSpeed = 300; 
+    const minAngle = -135;
+    const maxAngle = 135; 
+    return minAngle + (currentSpeed / maxSpeed) * (maxAngle - minAngle);
+  };
+
+
+const renderSpeedometerScale = () => {
+  const marks = [];
+  const totalMarks = 16; 
+  const maxAngle = 270;
+  const angleStep = maxAngle / (totalMarks - 1);
+
+  for (let i = 0; i < totalMarks; i++) {
+    const angle = 45 + i * angleStep; 
+    const rotation = `${angle}deg`;
+    const label = i * 20;
+
+    marks.push(
+      <View key={i} style={[styles.scaleMarkContainer, { transform: [{ rotate: rotation }] }]}>
+        <View style={styles.scaleMark} />
+        <Text style={[styles.scaleLabel, { transform: [{ rotate: `${-angle}deg` }] }]}>
+          {label}
+        </Text>
+      </View>
+    );
+  }
+
+  return marks;
+};
+
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.leanContainer}>
@@ -234,22 +273,49 @@ const NewRouteScreen = () => {
       </View>
 
       <View style={styles.routeDataContainer}>
-        <Text style={styles.routeText}>Prędkość: {speed.toFixed(1)} km/h</Text>
-        <Text style={styles.routeText}>Dystans: {distance.toFixed(1)} km</Text>
-        <Text style={styles.routeText}> Czas: {Math.floor(duration / 3600)} g {Math.floor((duration % 3600) / 60)} m {duration % 60} s</Text>       
-         <Text style={styles.routeText}>GPS: {gpsSignalStrength}</Text>
+      
+      <Text style={styles.routeText}>Sygnał GPS: {gpsSignalStrength}</Text>
+   
+      <View style={styles.detailsContainer}>
+
+  <View style={styles.detailItem}>
+    <Text style={styles.subtitleText}>Dystans:</Text>
+    <Text style={styles.descriptionText}>{distance.toFixed(1)} km</Text>
+  </View>
+
+  <View style={styles.detailItem}>
+    <Text style={styles.subtitleText}>Czas:</Text>
+    <Text style={styles.descriptionText}>{Math.floor(duration / 3600)}g {Math.floor((duration % 3600) / 60)}m {duration % 60}s</Text>
+  </View>
+
+      </View>
+</View>
+  <View style={styles.speedometerContainer}>
+        <View style={styles.speedometer}>
+          {renderSpeedometerScale()}
+          <Text style={styles.speedText}>{speed.toFixed(0)} km/h</Text>
+          <Text style={styles.maxSpeedText}>Max. {maxSpeed.toFixed(0)} km/h</Text>
+
+          <View style={styles.needleContainer}>
+            <View
+              style={[
+                styles.needle,
+                { transform: [{ rotate: `${getNeedleRotation(speed)}deg` }] },
+              ]}
+            />
+          </View>
+        </View>
       </View>
 
       <TouchableOpacity style={styles.startButton} onPress={handleStartStop}>
-        <Text style={styles.buttonText}>{isRecording ? 'Zatrzymaj' : 'Start'}</Text>
+        <Text style={styles.buttonText}>{isRecording ? 'Stop' : 'Start'}</Text>
       </TouchableOpacity>
-
       <TouchableOpacity style={styles.calibrateButton} onPress={handleCalibration}>
         <Text style={styles.buttonText}>Kalibruj</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.mapToggleButton} onPress={toggleMap}>
-        <Text style={styles.buttonText}>Pokaż mapę</Text>
+      <Text style={styles.buttonText}>{isMapVisible ? 'Ukryj mapę' : 'Pokaż mapę'}</Text>
       </TouchableOpacity>
 
       {isMapVisible && (
@@ -323,12 +389,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     marginVertical: 5,
+    marginTop: 5
   },
   startButton: {
     backgroundColor: '#007bff',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    marginTop: 10,
   },
   calibrateButton: {
     backgroundColor: '#007bff',
@@ -338,7 +406,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     position: 'absolute',
     bottom:20,
-    right: 20
+    right: 20,
+    width: 125,
+    height:45
   },
   buttonText: {
     color: '#fff',
@@ -353,6 +423,8 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     zIndex: 10,
+    width: 125,
+    height:45
   },
   mapContainer: {
     position: 'absolute',
@@ -373,6 +445,108 @@ const styles = StyleSheet.create({
     backgroundColor: '#007bff',
     padding: 10,
     borderRadius: 20,
+  },
+  leanText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },  
+  speedometerContainer: {
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    borderWidth: 2,
+    borderColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+    alignSelf:'center',
+    marginTop: 30,
+    marginBottom: 30
+  },
+  speedometer: {
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    borderWidth: 5,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  speedText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#fff',
+    position: 'absolute',
+    top: '67%',
+  },
+  maxSpeedText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#fff',
+    position: 'absolute',
+    top: '80%',
+  },
+  needleContainer: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    bottom: '50%',
+  },
+  needle: {
+    width: 0,
+    height: 0,
+    borderStyle: 'solid',
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 100,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#007bff',   
+  },
+  scaleMarkContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+  },
+  scaleMark: {
+    width: 2,
+    height: 15,
+    backgroundColor: '#fff',
+    position: 'absolute',
+    bottom: 10,
+  },
+  scaleLabel: {
+    color: '#fff',
+    position: 'absolute',
+    bottom: 30,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  subtitleText: {
+    color: '#6e6e6e',
+    fontSize: 13,
+    marginBottom: 0
+  },
+  descriptionText: {
+    color: 'white',
+    fontSize: 15,
+    marginTop: 0
+  },
+  detailsContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  detailItem: {
+    width: '48%', 
+    marginBottom: 10, 
+    alignItems: 'center', 
   },
 });
 
