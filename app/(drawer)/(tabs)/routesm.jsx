@@ -107,7 +107,9 @@ const RoutesScreen = () => {
 
   const handleOpenModal = (routeId) => {
     setRouteToDelete(routeId); 
+    setModalVisible(true);
   };
+  
 
   const handleCloseModal = () => {
     setModalVisible(false);

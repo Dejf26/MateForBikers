@@ -8,6 +8,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Modal,
+  Dimensions
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +16,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+
+const windowHeight = Dimensions.get('window').height;
+
 
 const AddVehicle = () => {
   const navigation = useNavigation();
@@ -180,45 +184,38 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 15,
   },
+  // image: {
+  //   width: '100%',
+  //   justifyContent: 'flex-end',
+  //   marginLeft: 50,
+  // },
+  // skewedTextContainer: {
+  //   width: '115%',
+  //   height: '150%',
+  //   padding: 10,
+  //   marginLeft: -180,
+  //   transform: [{ translateY: 0 }, { rotate: '-75deg' }],
+  // },
   previewContainer: {
-    marginTop: 20,
-    height: 200,
-    position: 'relative',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  image: {
+    height: windowHeight / 3 - 70,
     width: '100%',
-    height: '100%',
+    overflow: 'hidden',
+    borderRadius: 10,
+    marginBottom: 20,
+    position: 'relative',
+    marginTop:30
+  },
+ image: {
+    width: '100%',
     justifyContent: 'flex-end',
+    marginLeft: 50,
   },
   skewedTextContainer: {
-    width: '125%',
+     width: '115%',
     height: '150%',
     padding: 10,
     marginLeft: -180,
     transform: [{ translateY: 0 }, { rotate: '-75deg' }],
-  },
-  menuIcon: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  optionsContainer: {
-    position: 'absolute',
-    bottom: 40,
-    right: 10,
-    backgroundColor: '#2D2F33',
-    borderRadius: 5,
-    padding: 5,
-    elevation: 5,
-    zIndex: 1,
-  },
-  optionButton: {
-    padding: 5,
-  },
-  optionText: {
-    color: 'white',
   },
   textContainer: {
     position: 'absolute',
@@ -228,6 +225,29 @@ const styles = StyleSheet.create({
     right: 12,
     justifyContent: 'space-evenly',
     alignItems: 'stretch',
+  },
+  menuIcon: {
+    position: 'absolute',
+    bottom: 10,
+    right: 65,
+  },
+  optionsContainer: {
+    position: 'absolute',
+    bottom: 40,
+    right: 65,
+    backgroundColor: '#2D2F33',
+    borderRadius: 5,
+    padding: 5,
+    elevation: 5,
+    zIndex: 1,
+  },
+  optionButton: {
+    padding: 5,
+    right: 65,
+  },
+  optionText: {
+    color: 'white',
+    right: -65
   },
   tileText: {
     color: 'white',

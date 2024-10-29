@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   checkbox: {
     position: 'absolute',
     top: 10,
-    right: -345,
+    right: -340,
   },
   optionsIcon: {
     position: 'absolute',
