@@ -35,9 +35,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "extra":{
-      "weatherApiKey": "27bb4bc7c58ad4562286aded0cb8e50b"
-    },
     "plugins": [
       "expo-router"
     ]

@@ -119,6 +119,8 @@ const Layout = () => {
       navigation.navigate('addVehicle');
     } else if (activeRoute === 'routesm') {
       navigation.navigate('addRoute');
+    } else if (activeRoute === 'weather') {
+      navigation.navigate('addWeather');
     } else {
       Alert.alert('Brak przekierowania');
     }
@@ -286,6 +288,36 @@ const Layout = () => {
         headerLeft: () => (<ToggleDrawer />),
       }} />
        <Drawer.Screen name='routeDetails' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+       <Drawer.Screen name='addWeather' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+       <Drawer.Screen name='weatherDetails' options={{
         headerShown: true,
         headerTintColor: "white",
         title: (
