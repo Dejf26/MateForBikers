@@ -23,25 +23,27 @@ const apiKey = '27bb4bc7c58ad4562286aded0cb8e50b';
 const translateCondition = (condition) => {
   switch (condition) {
     case 'clear sky':
-      return 'bezchmurnie';
+      return 'Bezchmurnie';
    case 'overcast clouds':
-      return 'zachmurzenie';
+      return 'Zachmurzenie';
    case 'few clouds':
-      return 'małe zachmurzenie';
+      return 'Małe zachmurzenie';
     case 'scattered clouds':
-      return 'rozproszone chmury';
+      return 'Rozproszone chmury';
     case 'broken clouds':
-      return 'duże zachmurzenie';
+      return 'Duże zachmurzenie';
     case 'shower rain':
-      return 'przelotne opady deszczu';
+      return 'Przelotne opady deszczu';
     case 'rain':
-      return 'deszcz';
+      return 'Deszcz';
+      case 'light rain':
+        return 'Lekki deszcz';
     case 'thunderstorm':
-      return 'burza';
+      return 'Burza';
     case 'snow':
-      return 'śnieg';
+      return 'Śnieg';
     case 'mist':
-      return 'mgła';
+      return 'Mgła';
     default:
       return condition;
   }
