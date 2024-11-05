@@ -9,7 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 
 const windowHeight = Dimensions.get('window').height;
 
-const VehicleTile = ({ vehicle, isChecked, onSelect, onOptions, onEdit, onDelete, showOptions }) => {
+const VehicleTile = ({ vehicle, isChecked, onSelect, onOptions, onEdit, onDelete, onReminders, showOptions }) => {
   const imageSource = vehicle.image.uri ? { uri: vehicle.image.uri } : vehicle.image || require('../../../assets/images/bike.jpg');
 
   return (
@@ -48,6 +48,9 @@ const VehicleTile = ({ vehicle, isChecked, onSelect, onOptions, onEdit, onDelete
           <TouchableOpacity onPress={onDelete} style={styles.optionButton}>
             <Text style={styles.optionText}>Usuń</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={onReminders} style={styles.optionButton}>
+            <Text style={styles.optionText}>Powiadomienia</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -61,6 +64,10 @@ const VehiclesList = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [optionsVisible, setOptionsVisible] = useState(null); 
   const [modalVisible, setModalVisible] = useState(false);
+
+  const handleReminders = (vehicle) => {
+    navigation.navigate('reminders', { vehicle });
+  };
 
   const fetchVehicles = async () => {
     try {
@@ -160,6 +167,7 @@ const VehiclesList = () => {
               onOptions={() => handleOptions(item)}
               onEdit={handleEditVehicle}
               onDelete={handleOpenModal}
+              onReminders={() => handleReminders(item)}
               showOptions={optionsVisible === item.vin}
             />
           )}

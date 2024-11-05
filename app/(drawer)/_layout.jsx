@@ -121,6 +121,8 @@ const Layout = () => {
       navigation.navigate('addRoute');
     } else if (activeRoute === 'weather') {
       navigation.navigate('addWeather');
+    } else if (activeRoute === 'reminders') {
+      navigation.navigate('addReminder');
     } else {
       Alert.alert('Brak przekierowania');
     }
@@ -318,6 +320,45 @@ const Layout = () => {
         headerLeft: () => (<ToggleDrawer />),
       }} />
        <Drawer.Screen name='weatherDetails' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+            <Drawer.Screen name='reminders' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+        headerRight: () => (
+          <Icon
+            name="plus"
+            onPress={handlePlusPress} 
+            color="#fff"
+            size={25}
+            style={{ marginRight: 15 }}
+          />
+        ),
+      }} />
+       <Drawer.Screen name='addReminder' options={{
         headerShown: true,
         headerTintColor: "white",
         title: (
