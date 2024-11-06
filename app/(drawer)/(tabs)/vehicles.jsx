@@ -65,8 +65,15 @@ const VehiclesList = () => {
   const [optionsVisible, setOptionsVisible] = useState(null); 
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleReminders = (vehicle) => {
-    navigation.navigate('reminders', { vehicle });
+
+  
+  const handleRemindersPress = async (vin) => {
+    try {
+      await AsyncStorage.setItem('selectedVehicleVIN', vin);
+      navigation.navigate('reminders'); 
+    } catch (error) {
+      console.error("Błąd przy zapisywaniu VIN:", error);
+    }
   };
 
   const fetchVehicles = async () => {
@@ -167,7 +174,7 @@ const VehiclesList = () => {
               onOptions={() => handleOptions(item)}
               onEdit={handleEditVehicle}
               onDelete={handleOpenModal}
-              onReminders={() => handleReminders(item)}
+              onReminders={() => handleRemindersPress(item.vin)}
               showOptions={optionsVisible === item.vin}
             />
           )}

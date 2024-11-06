@@ -94,23 +94,16 @@ const Layout = () => {
   const navigation = useNavigation();
   const route = useRoute(); 
 
-  const handlePlusPress = () => {
+  const handlePlusPress = async () => {
     const getActiveRouteName = (state) => {
       if (!state || !state.routes || state.routes.length === 0) return null;
-      
-      const route = state.routes[state.index];  
-  
-      
-      if (route.state) {
-        
-        return getActiveRouteName(route.state);
-      }
-  
-      return route.name;  
+      const route = state.routes[state.index];
+      return route.state ? getActiveRouteName(route.state) : route.name;
     };
   
-    const state = navigation.getState();
-    const activeRoute = getActiveRouteName(state);
+   
+  const state = navigation.getState();
+  const activeRoute = getActiveRouteName(state);
   
   
     if (activeRoute === 'costs') {
@@ -122,7 +115,12 @@ const Layout = () => {
     } else if (activeRoute === 'weather') {
       navigation.navigate('addWeather');
     } else if (activeRoute === 'reminders') {
-      navigation.navigate('addReminder');
+      const selectedVIN = await AsyncStorage.getItem('selectedVehicleVIN');
+      if (selectedVIN) {
+        navigation.navigate('addReminder', { vin: selectedVIN });
+      } else {
+        Alert.alert('No vehicle selected');
+      }
     } else {
       Alert.alert('Brak przekierowania');
     }
