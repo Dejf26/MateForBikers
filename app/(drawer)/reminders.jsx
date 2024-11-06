@@ -24,27 +24,38 @@ const Reminders = () => {
     React.useCallback(() => {
       const loadReminders = async () => {
         try {
-          const storedReminders = await AsyncStorage.getItem('vehicleReminders');
-          const parsedReminders = storedReminders ? JSON.parse(storedReminders) : [];
-          setReminders(parsedReminders);
+          const selectedVIN = await AsyncStorage.getItem('selectedVehicleVIN');
+          if (selectedVIN) {
+            const reminders = JSON.parse(await AsyncStorage.getItem(`reminders_${selectedVIN}`)) || [];
+            setReminders(reminders);
+          } else {
+            Alert.alert('Nie wybrano pojazdu');
+            setReminders([]);
+          }
         } catch (error) {
-          console.error("Error loading reminders:", error);
+          console.error("Błąd przy ładowaniu przypomnień:", error);
         }
       };
       loadReminders();
     }, [])
   );
-
-  const deleteReminder = async (id) => {
+  
+  const handleDeleteReminder = async (reminderId) => {
     try {
-      const updatedReminders = reminders.filter((reminder) => reminder.id !== id);
-      setReminders(updatedReminders);
-      await AsyncStorage.setItem('vehicleReminders', JSON.stringify(updatedReminders));
+      const selectedVIN = await AsyncStorage.getItem('selectedVehicleVIN'); 
+      if (!selectedVIN) {
+        Alert.alert('Nie wybrano pojazdu');
+        return;
+      }
+      const updatedReminders = reminders.filter(reminder => reminder.id !== reminderId);
+      setReminders(updatedReminders); 
+      await AsyncStorage.setItem(`reminders_${selectedVIN}`, JSON.stringify(updatedReminders));
       setModalVisible(false);
     } catch (error) {
-      console.error("Error deleting reminder:", error);
+      console.error("Błąd przy usuwaniu przypomnienia:", error);
     }
   };
+
 
   const handleOptions = (reminder) => {
     if (optionsVisible === reminder.id) {
@@ -112,7 +123,7 @@ const Reminders = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>Czy na pewno chcesz usunąć to przypomnienie?</Text>
-            <TouchableOpacity onPress={() => deleteReminder(selectedReminder.id)}>
+            <TouchableOpacity onPress={() => handleDeleteReminder(selectedReminder.id)}>
             <Text style={[styles.modalButton, { backgroundColor: '#d9534f' }]}>Usuń</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setModalVisible(false)}>

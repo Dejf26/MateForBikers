@@ -39,26 +39,35 @@ const AddReminder = () => {
     setEndDate(currentDate);
   };
   
-  const handleAddReminder = async () => {
-    const reminder = {
-      id: Date.now().toString(),
-      category,
-      startDate: startDate.toLocaleDateString(),
-      endDate: endDate.toLocaleDateString(),
-      daysBefore,
-    };
-
+const handleAddReminder = async () => {
     try {
-      const storedReminders = await AsyncStorage.getItem('vehicleReminders');
+      const selectedVIN = await AsyncStorage.getItem('selectedVehicleVIN'); 
+      if (!selectedVIN) {
+        Alert.alert('Nie wybrano pojazdu');
+        return;
+      }
+  
+      const reminder = {
+        id: Date.now().toString(),
+        category,
+        startDate: startDate.toLocaleDateString(),
+        endDate: endDate.toLocaleDateString(),
+        daysBefore,
+      };
+  
+      const storedReminders = await AsyncStorage.getItem(`reminders_${selectedVIN}`); 
       const reminders = storedReminders ? JSON.parse(storedReminders) : [];
       reminders.push(reminder);
-      await AsyncStorage.setItem('vehicleReminders', JSON.stringify(reminders));
+      await AsyncStorage.setItem(`reminders_${selectedVIN}`, JSON.stringify(reminders)); 
+  
       navigation.navigate('reminders');
       resetForm();
     } catch (error) {
-      console.error("Error saving reminder:", error);
+      console.error("Błąd przy zapisywaniu przypomnienia:", error);
     }
   };
+  
+  
 
   const resetForm = () => {
     setCategory('');
