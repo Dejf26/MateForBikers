@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Dimensions, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -84,26 +84,50 @@ const RoutesScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [routeToDelete, setRouteToDelete] = useState(null);
 
-  const fetchRoutes = async () => {
-    try {
-      const storedRoutes = await AsyncStorage.getItem('routes');
-      if (storedRoutes) {
-        setRoutes(JSON.parse(storedRoutes));
-      }
-    } catch (error) {
-      console.error('Błąd przy pobieraniu tras z AsyncStorage:', error);
-    }
-  };
+//   const [lastRoute, setLastRoute] = useState(null);
 
-  const deleteRoute = async () => {
-    if (routeToDelete !== null) {
-      const updatedRoutes = routes.filter(route => route.id !== routeToDelete);
-      setRoutes(updatedRoutes);
-      await AsyncStorage.setItem('routes', JSON.stringify(updatedRoutes));
-      setModalVisible(false);
-      setRouteToDelete(null);
+
+// const saveLatestRoute = async (routes) => {
+//   if (routes.length > 0) {
+//     const latestRoute = routes[routes.length - 1];
+//     await AsyncStorage.setItem('latestRoute', JSON.stringify(latestRoute));
+//   }
+// };
+
+const fetchRoutes = async () => {
+  try {
+    const storedRoutes = await AsyncStorage.getItem('routes');
+    const parsedRoutes = storedRoutes ? JSON.parse(storedRoutes) : [];
+
+    setRoutes(parsedRoutes);
+
+    // Zapisz ostatnią trasę lub ustaw na null, gdy lista jest pusta
+    if (parsedRoutes.length > 0) {
+      await AsyncStorage.setItem('latestRoute', JSON.stringify(parsedRoutes[parsedRoutes.length - 1]));
+    } else {
+      await AsyncStorage.removeItem('latestRoute');
     }
-  };
+  } catch (error) {
+    console.error('Błąd pobierania tras:', error);
+  }
+};
+
+const deleteRoute = async () => {
+  if (routeToDelete !== null) {
+    const updatedRoutes = routes.filter(route => route.id !== routeToDelete);
+    setRoutes(updatedRoutes);
+    await AsyncStorage.setItem('routes', JSON.stringify(updatedRoutes));
+    setModalVisible(false);
+    setRouteToDelete(null);
+    fetchRoutes(); // odświeżenie listy tras po usunięciu
+  }
+};
+
+useFocusEffect(
+  useCallback(() => {
+    fetchRoutes(); // odświeżenie tras przy wejściu na ekran
+  }, [])
+);
 
   const handleOpenModal = (routeId) => {
     setRouteToDelete(routeId); 

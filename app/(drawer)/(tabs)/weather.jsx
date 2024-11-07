@@ -114,6 +114,8 @@ const WeatherList = () => {
   const [optionsVisible, setOptionsVisible] = useState(null);
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const [storedCity, setStoredCity] = useState(null);
+
 
   useEffect(() => {
     if (isFocused) {
@@ -141,30 +143,59 @@ const WeatherList = () => {
     }
   };
 
+  //////////////
   const loadSelectedWeather = async () => {
     try {
-      const storedCity = await AsyncStorage.getItem('selectedWeather');
-      if (storedCity) {
-        setSelectedWeather(storedCity);
+      const storedCityData = await AsyncStorage.getItem('selectedWeather');
+      if (storedCityData) {
+        const parsedData = JSON.parse(storedCityData);  // Parsowanie obiektu JSON
+        setSelectedWeather(parsedData.city);  // Ustawienie miasta
+        setWeatherData(prevState => ({
+          ...prevState,
+          [parsedData.city]: parsedData,  // Zaktualizowanie danych pogodowych
+        }));
       }
     } catch (error) {
       console.error('Error loading selected weather:', error);
     }
   };
 
+  
+
+
+  // useEffect(() => {
+  //   const loadSelectedWeather = async () => {
+  //     try {
+  //       const storedWeather = await AsyncStorage.getItem('selectedWeather');
+  //       if (storedWeather) {
+  //         const parsedWeather = JSON.parse(storedWeather);
+  //         setSelectedWeather(parsedWeather.city);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error loading selected weather:', error);
+  //     }
+  //   };
+  
+  //   loadSelectedWeather();
+  // }, []);
+  
+
   const handleSelectWeather = async (city) => {
     try {
+      const weather = weatherData[city];
       if (selectedWeather === city) {
         setSelectedWeather(null);
         await AsyncStorage.removeItem('selectedWeather');
       } else {
         setSelectedWeather(city);
-        await AsyncStorage.setItem('selectedWeather', city);
+        await AsyncStorage.setItem('selectedWeather', JSON.stringify({ city, ...weather }));
       }
     } catch (error) {
-      console.error('Error saving city to AsyncStorage:', error);
+      console.error('Error saving selected weather:', error);
     }
   };
+  
+///////////////////  
 
   const handleOptions = (city) => {
     if (optionsVisible === city) {
