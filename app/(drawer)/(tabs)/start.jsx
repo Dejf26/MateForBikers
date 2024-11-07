@@ -1,69 +1,171 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions, ImageBackground } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Dimensions, ImageBackground, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
+import { useFocusEffect } from '@react-navigation/native';
+import MapView, { Polyline } from 'react-native-maps';
 
 const windowHeight = Dimensions.get('window').height;
 
-const Tile = ({ title, subtitle, description, subtitle2, description2, subtitle3, description3, color, image }) => {
+// Vehicle tile component with image display
+const VehicleTile = ({ vehicle }) => (
+  <View style={styles.tileContainer}>
+    <ImageBackground source={vehicle.image?.uri ? { uri: vehicle.image.uri } : require('../../../assets/images/bike.jpg')} style={styles.image}>
+      <View style={[styles.skewedTextContainer, { backgroundColor: "#2D2F33" }]}></View>
+    </ImageBackground>
+    <View style={styles.textContainer}>
+      <Text style={styles.tileText}>Wybrany pojazd</Text>
+      <Text style={styles.subtitleText}>Marka</Text>
+      <Text style={styles.descriptionText}>{vehicle.brand || '-'}</Text>
+      <Text style={styles.subtitleText}>Model</Text>
+      <Text style={styles.descriptionText}>{vehicle.model || '-'}</Text>
+      <Text style={styles.subtitleText}>Rok produkcji</Text>
+      <Text style={styles.descriptionText}>{vehicle.year || '-'}</Text>
+    </View>
+  </View>
+);
+
+const RouteTile = ({ route }) => {
+  const mapRegion = route.coordinates?.length > 0 ? {
+    latitude: route.coordinates[0].latitude,
+    longitude: route.coordinates[0].longitude,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  } : null;
+
   return (
     <View style={styles.tileContainer}>
-      <ImageBackground source={image} style={styles.image}>
-        <View style={[styles.skewedTextContainer, { backgroundColor: color }]}></View>
-      </ImageBackground>
+      {mapRegion ? (
+        <MapView style={styles.map} initialRegion={mapRegion} scrollEnabled={false} zoomEnabled={false}>
+          <Polyline coordinates={route.coordinates} strokeWidth={4} strokeColor="blue" />
+        </MapView>
+      ) : (
+        <ImageBackground source={require('../../../assets/images/route.jpg')} style={styles.map} />
+      )}
+      <View style={[styles.skewedTextMapContainer, { backgroundColor: '#2D2F33' }]}></View>
+
       <View style={styles.textContainer}>
-        <Text style={styles.tileText}>{title}</Text>
-        {subtitle && <Text style={styles.subtitleText}>{subtitle}</Text>}
-        {description && <Text style={styles.descriptionText}>{description}</Text>}
-        {subtitle2 && <Text style={styles.subtitleText}>{subtitle2}</Text>}
-        {description2 && <Text style={styles.descriptionText}>{description2}</Text>}
-        {subtitle3 && <Text style={styles.subtitleText}>{subtitle3}</Text>}
-        {description3 && <Text style={styles.descriptionText}>{description3}</Text>}
+        <Text style={styles.tileText}>Ostatnia trasa</Text>
+        <Text style={styles.subtitleText}>Czas trwania</Text>
+        <Text style={styles.descriptionText}>
+          {route.duration ? `${Math.floor(route.duration / 3600)}h ${Math.floor((route.duration % 3600) / 60)}m` : '-'}
+        </Text>
+        <Text style={styles.subtitleText}>Maksymalna prędkość</Text>
+        <Text style={styles.descriptionText}>{route.maxSpeed ? `${route.maxSpeed} km/h` : '-'}</Text>
+        <Text style={styles.subtitleText}>Dystans</Text>
+        <Text style={styles.descriptionText}>
+          {route.distance !== undefined ? `${route.distance.toFixed(1)} km` : '-'}
+        </Text>
       </View>
     </View>
   );
-}
+};
+
+const translateCondition = (condition) => {
+  switch (condition) {
+    case 'clear sky': return 'Bezchmurnie';
+    case 'overcast clouds': return 'Zachmurzenie';
+    case 'few clouds': return 'Małe zachmurzenie';
+    case 'scattered clouds': return 'Rozproszone chmury';
+    case 'broken clouds': return 'Duże zachmurzenie';
+    case 'shower rain': return 'Przelotne opady deszczu';
+    case 'rain': return 'Deszcz';
+    case 'light rain': return 'Lekki deszcz';
+    case 'thunderstorm': return 'Burza';
+    case 'snow': return 'Śnieg';
+    case 'mist': return 'Mgła';
+    default: return condition;
+  }
+};
+
+const WeatherTile = ({ weather }) => (
+  <View style={styles.tileContainer}>
+    <View style={styles.conditionContainer}>
+      {weather.icon && weather.temp !== undefined ? (
+        <View style={styles.iconContainer}>
+          <Image
+            source={{ uri: `https://openweathermap.org/img/w/${weather.icon}.png` }}
+            style={styles.weatherIcon}
+          />
+          <Text style={styles.tempText}>{`${weather.temp}°C`}</Text>
+        </View>
+      ) : (
+        <View style={styles.iconContainer}>
+          <Text style={styles.tempText}></Text>
+        </View>
+      )}
+    </View>
+
+    <View style={[styles.skewedTextMapContainer, { backgroundColor: '#2D2F33' }]}></View>
+
+    <View style={styles.textContainer}>
+      <Text style={styles.tileText}>Prognoza pogody</Text>
+      <Text style={styles.subtitleText}>Miasto:</Text>
+      <Text style={styles.descriptionText}>{weather.city || '-'}</Text>
+      <Text style={styles.subtitleText}>Warunki:</Text>
+      <Text style={styles.descriptionText}>{translateCondition(weather.conditions || '-')}</Text>
+      <Text style={styles.subtitleText}>Szansa na opady:</Text>
+      <Text style={styles.descriptionText}>{weather.rainChance !== undefined ? `${weather.rainChance}%` : '-'}</Text>
+    </View>
+  </View>
+);
 
 const Start = () => {
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [latestRoute, setLatestRoute] = useState(null);
+  const [selectedWeather, setSelectedWeather] = useState(null);
+
+  const loadSelectedVehicle = async () => {
+    try {
+      const storedVin = await AsyncStorage.getItem('selectedVehicle');
+      const vehiclesData = await AsyncStorage.getItem('vehicles');
+      const vehicles = vehiclesData ? JSON.parse(vehiclesData) : [];
+
+      if (storedVin) {
+        const foundVehicle = vehicles.find(vehicle => vehicle.vin === storedVin);
+        setSelectedVehicle(foundVehicle || {});
+      }
+    } catch (error) {
+      console.error("Error loading selected vehicle:", error);
+    }
+  };
+
+  const fetchLatestRoute = async () => {
+    try {
+      const storedRoute = await AsyncStorage.getItem('latestRoute');
+      setLatestRoute(storedRoute ? JSON.parse(storedRoute) : {});
+    } catch (error) {
+      console.error('Error fetching latest route:', error);
+    }
+  };
+  
+  const loadSelectedWeather = async () => {
+    try {
+      const storedWeather = await AsyncStorage.getItem('selectedWeather');
+      setSelectedWeather(storedWeather ? JSON.parse(storedWeather) : {});
+    } catch (error) {
+      console.error('Error loading selected weather:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSelectedVehicle();
+      fetchLatestRoute();
+      loadSelectedWeather();
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <Tile 
-        title="Wybrany pojazd" 
-        subtitle="Marka" 
-        description="Marka" 
-        subtitle2="Model" 
-        description2="Model" 
-        subtitle3="Rok produkcji" 
-        description3="Rok produkcji" 
-        color="#2D2F33" 
-        image={require('../../../assets/images/bike.jpg')} 
-      />
-      <Tile 
-        title="Prognoza pogody" 
-        subtitle="Temperatura" 
-        description="Temperatura" 
-        subtitle2="Warunki" 
-        description2="Warunki" 
-        subtitle3="Szansa na opady" 
-        description3="Szansa na opady" 
-        color="#2D2F33" 
-        image={require('../../../assets/images/route.jpg')} 
-      />
-      <Tile 
-        title="Ostatnia trasa" 
-        subtitle="Czas trwania" 
-        description="Czas trwania" 
-        subtitle2="Maksymalna prędkość" 
-        description2="Maksymalna prędkość" 
-        subtitle3="Dystans" 
-        description3="Dystans" 
-        color="#2D2F33" 
-        image={require('../../../assets/images/route.jpg')} 
-      />
+      <VehicleTile vehicle={selectedVehicle || {}} />
+      <WeatherTile weather={selectedWeather || {} } />
+      <RouteTile route={latestRoute || {}} />
       <StatusBar style='light' />
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -80,13 +182,27 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 20,
   },
+  map: {
+    width: 170,
+    height: '100%', 
+    borderRadius: 10,
+    position: 'absolute',
+    right: 0,
+  },
   image: {
-   width: '100%',
-  justifyContent:'flex-end',
-  marginLeft: 60
+    width: '100%',
+    justifyContent: 'flex-end',
+    marginLeft: 60
   },
   skewedTextContainer: {
     width: '115%',
+    height: '150%',
+    padding: 10,
+    marginLeft: -180,
+    transform: [{ translateY: 0 }, { rotate: '-75deg' }],
+  },
+  skewedTextMapContainer: {
+    width: '133%',
     height: '150%',
     padding: 10,
     marginLeft: -180,
@@ -99,7 +215,7 @@ const styles = StyleSheet.create({
     left: 12,
     right: 12,
     justifyContent: 'space-evenly',
-    alignItems: 'strech',
+    alignItems: 'stretch',
   },
   tileText: {
     color: 'white',
@@ -114,7 +230,35 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 15,
     marginTop: -5
-  }
+  },
+  imagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#2D2F33',
+  },
+  iconContainer: {
+    flex: 1,
+    alignItems: 'center',
+    marginTop: 40,
+    marginLeft: 70
+  },
+  weatherIcon: {
+    width: 77,
+    height: 77,
+  },
+  tempText: {
+    fontSize: 25,
+    color: '#ffffff',
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+  conditionContainer: {
+    backgroundColor: '#007bff',
+    width: 225,
+    height: '100%',
+    position: 'absolute',
+    right: 0,
+  },
 });
 
 export default Start;
