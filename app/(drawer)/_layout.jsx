@@ -5,7 +5,7 @@ import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { router, usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 
 const CustomDrawerContent = (props) => {
   const pathname = usePathname();
@@ -93,6 +93,32 @@ const ToggleDrawer = () => {
 const Layout = () => {
   const navigation = useNavigation();
   const route = useRoute(); 
+  const pathname = usePathname();
+
+  const [isStartScreen, setIsStartScreen] = useState(pathname === '/start'); 
+  const [icon, setIcon] = useState('bell');
+  useEffect(() => {
+    
+    if (pathname === '/start') {
+      setIcon('bell');
+    }
+  }, [pathname]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (pathname === '/start') {
+        setIsStartScreen(true);
+        setIcon('bell')
+      } else {
+        setIsStartScreen(false);
+        setIcon('plus'); 
+      }
+    }, [pathname])
+  );
+
+  const handleBellPress = async () => {
+    alert("Powiadomienia")
+  }
 
   const handlePlusPress = async () => {
     const getActiveRouteName = (state) => {
@@ -100,12 +126,12 @@ const Layout = () => {
       const route = state.routes[state.index];
       return route.state ? getActiveRouteName(route.state) : route.name;
     };
-  
+
    
-  const state = navigation.getState();
-  const activeRoute = getActiveRouteName(state);
-  
-  
+
+    const state = navigation.getState();
+    const activeRoute = getActiveRouteName(state);
+
     if (activeRoute === 'costs') {
       navigation.navigate('addCost');
     } else if (activeRoute === 'vehicles') {
@@ -128,30 +154,39 @@ const Layout = () => {
 
   return (
     <Drawer drawerContent={(props) => <CustomDrawerContent {...props} />}>
-      <Drawer.Screen name='(tabs)' options={{
-        headerShown: true, 
-        headerTintColor: "white",
-        title: (
-          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
-            <Image
-              source={require('../../assets/images/mfb.png')}
-              style={{ width: 43, height: 43, marginLeft: -13 }}
-            />
-            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
-          </View>
-        ),
-        headerStyle: { backgroundColor: "#121212" },
-        headerLeft: () => (<ToggleDrawer />),
-        headerRight: () => (
-          <Icon
-            name="plus"
-            onPress={handlePlusPress} 
-            color="#fff"
-            size={25}
-            style={{ marginRight: 15 }}
-          />
-        ),
-      }} />
+      <Drawer.Screen
+        name="(tabs)"
+        options={{
+          headerShown: true,
+          headerTintColor: "white",
+          title: (
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+              <Image source={require('../../assets/images/mfb.png')} style={{ width: 43, height: 43, marginLeft: -13 }} />
+              <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+            </View>
+          ),
+          headerStyle: { backgroundColor: "#121212" },
+          headerLeft: () => (<ToggleDrawer />),
+          headerRight: () => (
+            isStartScreen ? (
+              <Icon
+                name={icon}
+                onPress={handleBellPress} 
+                color="#fff"
+                size={25}
+                style={{ marginRight: 15 }}
+              />
+            ) : (
+              <Icon
+                name="plus"
+                onPress={handlePlusPress} 
+                color="#fff"
+                size={25}
+                style={{ marginRight: 15 }}
+              />
+            )
+          ),
+        }} />
       <Drawer.Screen name='login' options={{
         headerShown: true,
         headerTintColor: "white",
