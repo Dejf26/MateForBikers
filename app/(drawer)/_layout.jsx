@@ -94,9 +94,56 @@ const Layout = () => {
   const navigation = useNavigation();
   const route = useRoute(); 
   const pathname = usePathname();
-
+  const [notificationCount, setNotificationCount] = useState(0);
   const [isStartScreen, setIsStartScreen] = useState(pathname === '/start'); 
   const [icon, setIcon] = useState('bell');
+
+  
+  const loadNotifications = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const reminderKeys = keys.filter(key => key.startsWith('reminders_'));
+      const allReminders = [];
+
+      for (const reminderKey of reminderKeys) {
+        const vin = reminderKey.replace('reminders_', '');
+        const reminders = JSON.parse(await AsyncStorage.getItem(reminderKey)) || [];
+
+        const vehicleData = JSON.parse(await AsyncStorage.getItem('vehicles')) || [];
+        const matchedVehicle = vehicleData.find(vehicle => vehicle.vin === vin);
+        const today = new Date();
+
+        reminders.forEach(reminder => {
+          const endDate = new Date(reminder.endDate.split('.').reverse().join('-'));
+          const daysUntilEnd = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+
+          if (reminder.daysBefore >= daysUntilEnd) {
+            allReminders.push({
+              ...reminder,
+              daysUntilEnd,
+              vehicleName: matchedVehicle ? `${matchedVehicle.brand} ${matchedVehicle.model}` : 'Nieznany pojazd',
+            });
+          }
+        });
+      }
+
+      setNotificationCount(allReminders.length);
+      await AsyncStorage.setItem('notificationCount', JSON.stringify(allReminders.length));
+    } catch (error) {
+      console.error("Błąd przy ładowaniu powiadomień:", error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadNotifications();
+    }, [])
+  );
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
   useEffect(() => {
     
     if (pathname === '/start') {
@@ -117,7 +164,7 @@ const Layout = () => {
   );
 
   const handleBellPress = async () => {
-    alert("Powiadomienia")
+navigation.navigate('notifications')
   }
 
   const handlePlusPress = async () => {
@@ -169,17 +216,31 @@ const Layout = () => {
           headerLeft: () => (<ToggleDrawer />),
           headerRight: () => (
             isStartScreen ? (
-              <Icon
-                name={icon}
-                onPress={handleBellPress} 
-                color="#fff"
-                size={25}
-                style={{ marginRight: 15 }}
-              />
+              <View style={{ position: 'relative', marginRight: 15 }}>
+                <Icon
+                  name={icon}
+                  onPress={handleBellPress}
+                  color="#fff"
+                  size={25}
+                />
+                {notificationCount > 0 && (
+                  <View style={{
+                    position: 'absolute',
+                    right: -5,
+                    top: -5,
+                    backgroundColor: 'blue',
+                    borderRadius: 10,
+                    paddingHorizontal: 5,
+                    paddingVertical: 2,
+                  }}>
+                    <Text style={{ color: '#fff', fontSize: 12 }}>{notificationCount}</Text>
+                  </View>
+                )}
+              </View>
             ) : (
               <Icon
                 name="plus"
-                onPress={handlePlusPress} 
+                onPress={handlePlusPress}
                 color="#fff"
                 size={25}
                 style={{ marginRight: 15 }}
@@ -392,6 +453,21 @@ const Layout = () => {
         ),
       }} />
        <Drawer.Screen name='addReminder' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+        <Drawer.Screen name='notifications' options={{
         headerShown: true,
         headerTintColor: "white",
         title: (

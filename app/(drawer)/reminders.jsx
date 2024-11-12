@@ -20,26 +20,43 @@ const Reminders = () => {
   const [optionsVisible, setOptionsVisible] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+
   useFocusEffect(
     React.useCallback(() => {
       const loadReminders = async () => {
         try {
           const selectedVIN = await AsyncStorage.getItem('selectedVehicleVIN');
+          const notifications = [];
           if (selectedVIN) {
             const reminders = JSON.parse(await AsyncStorage.getItem(`reminders_${selectedVIN}`)) || [];
+            const today = new Date();
+  
+            reminders.forEach(reminder => {
+              const [day, month, year] = reminder.endDate.split(".");
+              const formattedEndDate = `${year}-${month}-${day}`;
+  
+              const endDate = new Date(formattedEndDate);
+              const timeDifference = endDate - today;
+              const daysRemaining = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+
+              if (reminder.daysBefore >= daysRemaining) {
+                notifications.push(reminder);
+              }
+            });
+  
             setReminders(reminders);
-          } else {
-            Alert.alert('Nie wybrano pojazdu');
-            setReminders([]);
+            await AsyncStorage.setItem('notifications', JSON.stringify(notifications));
           }
         } catch (error) {
           console.error("Błąd przy ładowaniu przypomnień:", error);
         }
       };
+  
       loadReminders();
     }, [])
   );
   
+ 
   const handleDeleteReminder = async (reminderId) => {
     try {
       const selectedVIN = await AsyncStorage.getItem('selectedVehicleVIN'); 
