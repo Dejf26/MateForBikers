@@ -143,42 +143,21 @@ const WeatherList = () => {
     }
   };
 
-  //////////////
   const loadSelectedWeather = async () => {
     try {
       const storedCityData = await AsyncStorage.getItem('selectedWeather');
       if (storedCityData) {
-        const parsedData = JSON.parse(storedCityData);  // Parsowanie obiektu JSON
-        setSelectedWeather(parsedData.city);  // Ustawienie miasta
+        const parsedData = JSON.parse(storedCityData);  
+        setSelectedWeather(parsedData.city); 
         setWeatherData(prevState => ({
           ...prevState,
-          [parsedData.city]: parsedData,  // Zaktualizowanie danych pogodowych
+          [parsedData.city]: parsedData, 
         }));
       }
     } catch (error) {
       console.error('Error loading selected weather:', error);
     }
   };
-
-  
-
-
-  // useEffect(() => {
-  //   const loadSelectedWeather = async () => {
-  //     try {
-  //       const storedWeather = await AsyncStorage.getItem('selectedWeather');
-  //       if (storedWeather) {
-  //         const parsedWeather = JSON.parse(storedWeather);
-  //         setSelectedWeather(parsedWeather.city);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error loading selected weather:', error);
-  //     }
-  //   };
-  
-  //   loadSelectedWeather();
-  // }, []);
-  
 
   const handleSelectWeather = async (city) => {
     try {
@@ -195,7 +174,6 @@ const WeatherList = () => {
     }
   };
   
-///////////////////  
 
   const handleOptions = (city) => {
     if (optionsVisible === city) {

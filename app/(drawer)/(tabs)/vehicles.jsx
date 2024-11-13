@@ -117,11 +117,9 @@ const VehiclesList = () => {
       if (selectedVehicle && selectedVehicle.vin === vehicle.vin) {
         setSelectedVehicle(null);
         await AsyncStorage.removeItem('selectedVehicle');
-        console.log('Pojazd odznaczony, VIN usunięty z AsyncStorage');
       } else {
         setSelectedVehicle(vehicle);
         await AsyncStorage.setItem('selectedVehicle', vehicle.vin);
-        console.log('Pojazd zaznaczony, VIN zapisany:', vehicle.vin);
       }
     } catch (error) {
       console.error('Błąd podczas zapisywania VIN w AsyncStorage:', error);
