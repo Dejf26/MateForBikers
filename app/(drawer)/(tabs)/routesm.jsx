@@ -84,16 +84,6 @@ const RoutesScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [routeToDelete, setRouteToDelete] = useState(null);
 
-//   const [lastRoute, setLastRoute] = useState(null);
-
-
-// const saveLatestRoute = async (routes) => {
-//   if (routes.length > 0) {
-//     const latestRoute = routes[routes.length - 1];
-//     await AsyncStorage.setItem('latestRoute', JSON.stringify(latestRoute));
-//   }
-// };
-
 const fetchRoutes = async () => {
   try {
     const storedRoutes = await AsyncStorage.getItem('routes');
@@ -101,7 +91,6 @@ const fetchRoutes = async () => {
 
     setRoutes(parsedRoutes);
 
-    // Zapisz ostatnią trasę lub ustaw na null, gdy lista jest pusta
     if (parsedRoutes.length > 0) {
       await AsyncStorage.setItem('latestRoute', JSON.stringify(parsedRoutes[parsedRoutes.length - 1]));
     } else {
@@ -119,13 +108,13 @@ const deleteRoute = async () => {
     await AsyncStorage.setItem('routes', JSON.stringify(updatedRoutes));
     setModalVisible(false);
     setRouteToDelete(null);
-    fetchRoutes(); // odświeżenie listy tras po usunięciu
+    fetchRoutes();
   }
 };
 
 useFocusEffect(
   useCallback(() => {
-    fetchRoutes(); // odświeżenie tras przy wejściu na ekran
+    fetchRoutes();
   }, [])
 );
 

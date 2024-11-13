@@ -40,7 +40,7 @@ const CustomDrawerContent = (props) => {
         icon={({ color, size }) => (
           <Icon style={{ marginLeft: 7 }} name={"sd-card"} size={25} color={pathname == '/export' ? '#007DC9' : '#fff'} />
         )}
-        label={'Eksport danych'}
+        label={'Import / Eksport danych'}
         labelStyle={[{ marginLeft: 0, color: pathname == '/export' ? '#007DC9' : '#fff' }]}
         onPress={() => { router.push('/(drawer)/export') }}
       />
@@ -56,7 +56,7 @@ const CustomDrawerContent = (props) => {
       <View style={{ marginTop: 20, padding: 10 }}>
         {user ? (
           <>
-            <Text style={{ color: '#fff', marginBottom: 10 }}>Zalogowano jako: {user.email}</Text>
+            <Text style={{ color: '#fff', marginBottom: 10, alignSelf:'center' }}>Zalogowano jako: {user.email}</Text>
             <Button title="Wyloguj się" color="#007bff" onPress={handleLogout}  />
           </>
         ) : (
@@ -228,7 +228,7 @@ navigation.navigate('notifications')
                     position: 'absolute',
                     right: -5,
                     top: -5,
-                    backgroundColor: 'blue',
+                    backgroundColor: '#007bff',
                     borderRadius: 10,
                     paddingHorizontal: 5,
                     paddingVertical: 2,

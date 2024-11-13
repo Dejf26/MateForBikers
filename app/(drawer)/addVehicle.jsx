@@ -184,18 +184,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 15,
   },
-  // image: {
-  //   width: '100%',
-  //   justifyContent: 'flex-end',
-  //   marginLeft: 50,
-  // },
-  // skewedTextContainer: {
-  //   width: '115%',
-  //   height: '150%',
-  //   padding: 10,
-  //   marginLeft: -180,
-  //   transform: [{ translateY: 0 }, { rotate: '-75deg' }],
-  // },
   previewContainer: {
     height: windowHeight / 3 - 70,
     width: '100%',

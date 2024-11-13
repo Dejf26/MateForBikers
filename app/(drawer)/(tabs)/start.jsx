@@ -8,7 +8,6 @@ import MapView, { Polyline } from 'react-native-maps';
 
 const windowHeight = Dimensions.get('window').height;
 
-// Vehicle tile component with image display
 const VehicleTile = ({ vehicle }) => (
   <View style={styles.tileContainer}>
     <ImageBackground source={vehicle.image?.uri ? { uri: vehicle.image.uri } : require('../../../assets/images/bike.jpg')} style={styles.image}>
