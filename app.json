@@ -28,15 +28,24 @@
       },
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyCp1q2Bmbey_Ocf6hgXON-7tt723VzPN0s" 
+          "apiKey": "AIzaSyCp1q2Bmbey_Ocf6hgXON-7tt723VzPN0s"
         }
-      }
+      },
+      "package": "com.dejf26.mateforbikers"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6b4dcb18-8c0b-40b6-bf86-1106094761c4"
+      }
+    }
   }
 }

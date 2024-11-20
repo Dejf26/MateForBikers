@@ -49,7 +49,7 @@ const VehicleTile = ({ vehicle, isChecked, onSelect, onOptions, onEdit, onDelete
             <Text style={styles.optionText}>Usuń</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={onReminders} style={styles.optionButton}>
-            <Text style={styles.optionText}>Powiadomienia</Text>
+            <Text style={styles.optionText}>Przypomnienia</Text>
           </TouchableOpacity>
         </View>
       )}
