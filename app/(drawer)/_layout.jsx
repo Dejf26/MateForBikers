@@ -52,6 +52,14 @@ const CustomDrawerContent = (props) => {
         labelStyle={[{ marginLeft: 5, color: pathname == '/about' ? '#007DC9' : '#fff' }]}
         onPress={() => { router.push('/(drawer)/about') }}
       />
+      <DrawerItem
+        icon={({ color, size }) => (
+          <Icon style={{ marginLeft: 8 }} name={"question"} size={25} color={pathname == '/help' ? '#007DC9' : '#fff'} />
+        )}
+        label={'Pomoc'}
+        labelStyle={[{ marginLeft: 2, color: pathname == '/help' ? '#007DC9' : '#fff' }]}
+        onPress={() => { router.push('/(drawer)/help') }}
+      />
 
       <View style={{ marginTop: 20, padding: 10 }}>
         {user ? (
@@ -468,6 +476,21 @@ navigation.navigate('notifications')
         headerLeft: () => (<ToggleDrawer />),
       }} />
         <Drawer.Screen name='notifications' options={{
+        headerShown: true,
+        headerTintColor: "white",
+        title: (
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'space-between' }}>
+            <Image
+              source={require('../../assets/images/mfb.png')}
+              style={{ width: 43, height: 43, marginLeft: -13 }}
+            />
+            <Text style={{ color: 'white', fontSize: 24 }}>Mate for Bikers</Text>
+          </View>
+        ),
+        headerStyle: { backgroundColor: "#121212" },
+        headerLeft: () => (<ToggleDrawer />),
+      }} />
+            <Drawer.Screen name='help' options={{
         headerShown: true,
         headerTintColor: "white",
         title: (

@@ -57,7 +57,6 @@ const NotificationScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Powiadomienia</Text>
       {filteredReminders.length > 0 ? (
         <FlatList
           data={filteredReminders}
