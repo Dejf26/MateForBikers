@@ -8,6 +8,7 @@ import MapView, { Polyline } from 'react-native-maps';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import haversine from "haversine";
 
 const { width, height } = Dimensions.get('window');
 
@@ -161,7 +162,9 @@ const NewRouteScreen = () => {
     if (status !== 'granted') {
       return;
     }
-
+  
+    let lastLocation = null;
+  
     Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.Highest,
@@ -171,17 +174,31 @@ const NewRouteScreen = () => {
       (location) => {
         const { latitude, longitude, speed: currentSpeed } = location.coords;
         setCurrentLocation({ latitude, longitude });
+  
+        if (lastLocation) {
+          const newDistance = haversine(lastLocation, { latitude, longitude });
+          setDistance((prevDistance) => prevDistance + newDistance);
+        }
+  
+        lastLocation = { latitude, longitude };
         setRouteCoordinates((prevCoords) => [...prevCoords, { latitude, longitude }]);
-        const speedInKmH = currentSpeed !== null && currentSpeed !== undefined ? (currentSpeed * 3.6).toFixed(1) : '0.0';
+  
+        const speedInKmH =
+          currentSpeed !== null && currentSpeed !== undefined
+            ? (currentSpeed * 3.6).toFixed(1)
+            : '0.0';
         setSpeed(parseFloat(speedInKmH));
-    
-        setMaxSpeed((prevMaxSpeed) => Math.max(prevMaxSpeed, parseFloat(speedInKmH)));
-    
-        setGpsSignalStrength(location.coords.accuracy <= 5 ? 'Mocny' : 'Słaby');
+        setMaxSpeed((prevMaxSpeed) =>
+          Math.max(prevMaxSpeed, parseFloat(speedInKmH))
+        );
+  
+        setGpsSignalStrength(
+          location.coords.accuracy <= 5 ? 'Mocny' : 'Słaby'
+        );
       }
     );
   };
-
+  
   const toggleMap = () => {
     Animated.timing(mapPosition, {
       toValue: isMapVisible ? width : 0,

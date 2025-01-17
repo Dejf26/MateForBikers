@@ -44,6 +44,8 @@ const translateCondition = (condition) => {
       return 'Śnieg';
     case 'mist':
       return 'Mgła';
+    case 'light snow':
+      return 'Lekki śnieg';
     default:
       return condition;
   }
